@@ -1,0 +1,1030 @@
+  - Add: "✓ Task added successfully!" + show the task details?                                     
+  - Update: "✓ Task updated successfully!" + show new values?                                      
+  - Delete: "✓ Task deleted successfully!"                                                         
+  - Complete: "✓ Task marked as complete!"                                                         
+                                                                                                   
+  12. Questionary Usage                                                                            
+                                                                                                   
+  You mentioned using questionary - which features?                                                
+  - questionary.select() for menus                                                                 
+  - questionary.text() for text input                                                              
+  - questionary.confirm() for delete confirmation                                                  
+  - questionary.checkbox() for bulk operations                                                     
+yes                                                                                                
+                                                                                                   
+  13. Error Scenarios                                                                              
+                                                                                                   
+  - Task not found (invalid UUID)                                                                  
+  - Empty task list (no tasks to update/delete)                                                    
+  - Validation failures (empty title, too long)                                                    
+  - File permission issues                                                                         
+  - JSON parse errors                                                                              
+                                   show respective error messages                                  
+  14. Project Metadata                                                                             
+                                                                                                   
+  - Package name: todo-cli? hackathon-todo?   it is not a package.                                 
+  - Entry point command: python src/main.py                                                        
+  - Python version constraint:  3.13+                                                              
+  - Dependencies: questionary, rich (for tables), pytest, uuid (built-in)                          
+                                                                                                   
+  15. Testing Scope                                                                                
+                                                                                                   
+  - Unit tests for models, storage                                                                 
+  - Integration tests for full workflows?                                                          
+  - Mock file I/O or use temp files?       mock file i/o                                           
+  - Test coverage tools (coverage.py)?                                                             
+                                                                                                   
+  ---                                                                                              
+  Recommended Decisions (if you want to move fast)                                                 
+                                                                                                   
+  If you want me to make sensible defaults for these, here's what I'd suggest:                     
+                                                                                                   
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  - Navigation flow: After adding a task, return to main menu or show the task?       show all     
+tasks.                                                                                             
+  - Back/Cancel options: Can users go back from any submenu?    yes absolutely                     
+  - Exit behavior: Confirm before exiting or just exit?  confiorm exit.                            
+                                                                                                   
+  2. View/List Functionality - Filters                                                             
+                                                                                                   
+  You mentioned viewing tasks in tables, but:                                                      
+  - Filter options in view menu:                                                                   
+    - View all tasks                                                                               
+    - View only pending tasks                                                                      
+    - View only completed tasks                                                                    
+    - Any sorting? (by created date, updated date)                                                 
+                                                                                                   
+user should have options to view all, pending or completed tasks, then show them.                  
+                                                                                                   
+  - Empty state: What shows when no tasks exist?   show messagethat no tasks exisit yet. create    
+ a new one                                                                                         
+  - Pagination: If 50+ tasks exist, paginate or show all? paginate by 10                           
+                                                                                                   
+  3. Update Flow Details                                                                           
+                                                                                                   
+  - Task selection: User enters UUID (typing) or selects from numbered list?    user selects       
+from list.                                                                                         
+  - Current values display: Show current title/description before update?   yes absolutely.        
+  - Partial updates: Can user skip updating title and only update description? Or must both be     
+provided?  anyone can be upodated                                                                  
+  - Validation: What if user enters empty title during update? it gets error message,              
+appropriately.                                                                                     
+                                                                                                   
+  4. Delete Flow Details                                                                           
+                                                                                                   
+  - Task selection for delete: UUID entry or select from list?        select from list.            
+  - Confirmation message: "Are you sure you want to delete '[Task Title]'? (y/n)"   yes thats      
+good                                                                                               
+  - Bulk delete: You said yes to bulk operations - how does selection work?                        
+    - Select multiple from numbered list? (e.g., "1,3,5" or "1-5")   yes select multiple from      
+numbered list.                                                                                     
+    - Confirm each individually or one confirmation for all?    one conform for all. should        
+show how many tasks atre going to be deleted.                                                      
+                                                                                                   
+  5. Mark Complete Flow                                                                            
+                                                                                                   
+  - Toggle behavior: Should there be one "Toggle status" option or separate "Mark complete" and    
+ "Mark incomplete"? if it is complete should get oiption for mark incomplete and vice versa.       
+  - Already completed: If task is already complete and user marks it complete again, what          
+happens? Error or silent success? user should get the option for marking as complete. it will      
+get the option to mark as incomplete.                                                              
+  - Bulk complete: Can users mark multiple tasks complete at once? yes absolutely                  
+                                                                                                   
+  6. Field Constraints - Specific Limits                                                           
+                                                                                                   
+  You said "appropriate limits" - let's be specific:                                               
+  - Title: Min 1 char, Max ? (50? 100? 200?) 10                                                    
+  - Description: Min 0 chars (optional), Max ? (500? 1000?) 500                                    
+  - Special characters: Allow emojis, newlines in description?  yes                                
+                                                                                                   
+  7. Data Storage Details                                                                          
+                                                                                                   
+  - File location: data/tasks.json? .tasks.json in home dir? should be in the same direcltory      
+as the project root.                                                                               
+  - Initial state: Auto-create file if missing or error?    auto create if missing                 
+                                                                                                   
+  - Backup: Any auto-backup before modifications? not needed i think                               
+  - File corruption: How to handle? Reset to empty or error out?    reset to emplty and show       
+error message.                                                                                     
+                                                                                                   
+  8. User Input Handling                                                                           
+                                                                                                   
+  - Invalid menu choices: User enters "abc" instead of "1" - show error and re-prompt?             
+cannot do this, it will select from list of options                                                
+  - Empty inputs: User presses Enter without typing - treat as cancel? treat as cancel and show    
+ message thjat task addition aborted due to empty message.                                         
+  - Keyboard interrupts: Ctrl+C handling - exit gracefully or return to menu?  exit gracefuilly    
+ with message thabnks for using.                                                                   
+                                                                                                   
+  9. Display Formatting Specifics                                                                  
+                                                                                                   
+  You want colors but not rainbow - let's define:                                                  
+  - Color scheme:                                                                                  
+    - Completed tasks: Green                                                                       
+    - Pending tasks: Yellow? White?        yellow.                                                 
+    - Errors: Red                                                                                  
+    - Success messages: Green                                                                      
+    - Prompts/Headers: Blue? Cyan? blue                                                            
+  - Table columns: ID (full UUID or shortened?), Title, Description (truncated?), Status,          
+Created, Updated    (shorten uuid, use 8 char uuid at time of creation  )                          
+  - Description in table: If description is 500 chars, show full or truncate with "..."?           
+truncate                                                                                           
+                                                                                                   
+  10. Status Indicators                                                                            
+                                                                                                   
+  - Symbols: ✓ for complete, ✗ for pending? Or [DONE]/[TODO]?       symbols                        
+  - In lists: Show status icon before task title?   yes                                            
+                                                                                                   
+  11. Success/Feedback Messages                                                                    
+                                                                                                   
+  After each operation, what confirmation?                                                         
+  - Add: "✓ Task added successfully!" + show the task details?                                     
+  - Update: "✓ Task updated successfully!" + show new values?                                      
+  - Delete: "✓ Task deleted successfully!"                                                         
+  - Complete: "✓ Task marked as complete!"                                                         
+                                                                                                   
+  12. Questionary Usage                                                                            
+                                                                                                   
+  You mentioned using questionary - which features?                                                
+  - questionary.select() for menus                                                                 
+  - questionary.text() for text input                                                              
+  - questionary.confirm() for delete confirmation                                                  
+  - questionary.checkbox() for bulk operations                                                     
+yes                                                                                                
+                                                                                                   
+  13. Error Scenarios                                                                              
+                                                                                                   
+  - Task not found (invalid UUID)                                                                  
+  - Empty task list (no tasks to update/delete)                                                    
+  - Validation failures (empty title, too long)                                                    
+  - File permission issues                                                                         
+  - JSON parse errors                                                                              
+                                   show respective error messages                                  
+  14. Project Metadata                                                                             
+                                                                                                   
+  - Package name: todo-cli? hackathon-todo?   it is not a package.                                 
+  - Entry point command: python src/main.py                                                        
+  - Python version constraint:  3.13+                                                              
+  - Dependencies: questionary, rich (for tables), pytest, uuid (built-in)                          
+                                                                                                   
+  15. Testing Scope                                                                                
+                                                                                                   
+  - Unit tests for models, storage                                                                 
+  - Integration tests for full workflows?                                                          
+  - Mock file I/O or use temp files?       mock file i/o                                           
+  - Test coverage tools (coverage.py)?                                                             
+                                                                                                   
+                                                                                                   
+                                                                                                   
+                                                                                                   
+ i have answered your questions in this pasted text . got hrough it careful and telll iftill       
+missing something in the spec                                                                      
+                                                                                                   
+> pleaseretry agan                                                                                 
+  ⎿  Interrupted · What should Claude do instead?                                                  
+                                                                                                   
+> yes please continue                                                                              
+  ⎿  API Error: Connection error.                                                                  
+                                                                                                   
+> please try again                                                                                 
+  ⎿  API Error: Connection error.                                                                  
+                                                                                                   
+> try again                                                                                        
+                                                                                                   
+> try agaib                                                                                        
+                                                                                                   
+● 🌱 @bonsai: routing to stealth (free premium model).                                             
+                                                                                                   
+● Perfect! I've carefully reviewed all your answers. Let me identify what's still missing or needs 
+  clarification:                                                                                   
+                                                                                                   
+  Critical Missing Specifications                                                                  
+                                                                                                   
+  1. Title Constraint Issue                                                                        
+                                                                                                   
+  You said Title max is 10 characters - this seems very restrictive. A task title like "Buy        
+  groceries" is 13 characters. Did you mean:                                                       
+  - 10 words?                                                                                      
+  - 100 characters?                                                                                
+  - Or truly 10 characters (very short)?                                                           
+                                                                                                   
+  2. View Menu Sub-Navigation                                                                      
+                                                                                                   
+  When user selects "View all tasks", what happens next?                                           
+  View Tasks Menu:                                                                                 
+  1. View all tasks                                                                                
+  2. View pending tasks                                                                            
+  3. View completed tasks                                                                          
+  4. Back to main menu                                                                             
+  After showing the table, does user:                                                              
+  - Automatically return to view menu?                                                             
+  - Automatically return to main menu?                                                             
+  - See options: "Press any key to continue"?                                                      
+                                                                                                   
+  3. Mark Complete/Incomplete Flow                                                                 
+                                                                                                   
+  You said "if complete, show option for incomplete and vice versa". But from main menu, option #5 
+  says "Mark task as complete/incomplete". How does this work?                                     
+                                                                                                   
+  Option A: One unified menu                                                                       
+  Select task action:                                                                              
+  1. Mark as complete (shows only pending tasks)                                                   
+  2. Mark as incomplete (shows only completed tasks)                                               
+  3. Back                                                                                          
+                                                                                                   
+  Option B: Show all tasks with both options available                                             
+  [Shows all tasks]                                                                                
+  Select tasks to toggle status (✓ becomes ✗, ✗ becomes ✓)                                         
+                                                                                                   
+  Which approach?                                                                                  
+                                                                                                   
+  4. After Success Messages - Navigation                                                           
+                                                                                                   
+  You specified success messages, but what happens after?                                          
+  - Add task → ✓ Success → show all tasks (you mentioned this)                                     
+  - Update task → ✓ Success → return where? (main menu? view menu?)                                
+  - Delete task → ✓ Success → return where?                                                        
+  - Mark complete → ✓ Success → return where?                                                      
+                                                                                                   
+  5. Update Flow - Field Selection                                                                 
+                                                                                                   
+  When updating, you said "anyone can be updated" (either title or description). How does user     
+  choose?                                                                                          
+  What do you want to update?                                                                      
+  1. Title only                                                                                    
+  2. Description only                                                                              
+  3. Both title and description                                                                    
+  4. Cancel                                                                                        
+  Is this the flow?                                                                                
+                                                                                                   
+  6. Description Truncation Length                                                                 
+                                                                                                   
+  You said truncate description in tables. At what length?                                         
+  - 50 characters + "..."?                                                                         
+  - 100 characters + "..."?                                                                        
+  - Fit to terminal width?                                                                         
+                                                                                                   
+  7. Pagination Navigation                                                                         
+                                                                                                   
+  When showing 10 tasks per page:                                                                  
+  Showing tasks 1-10 of 47                                                                         
+  [table here]                                                                                     
+                                                                                                   
+  1. Next page                                                                                     
+  2. Previous page                                                                                 
+  3. Back to menu                                                                                  
+  Is this the pagination UI?                                                                       
+                                                                                                   
+  8. Empty List Handling in Operations                                                             
+                                                                                                   
+  When user selects "Update task" but no tasks exist:                                              
+  - Show error: "No tasks exist. Please create a task first."                                      
+  - Then go back to main menu automatically?                                                       
+  - Or show option to create task from there?                                                      
+                                                                                                   
+  Same for Delete and Mark Complete operations.                                                    
+                                                                                                   
+  9. JSON File Exact Path                                                                          
+                                                                                                   
+  You said "project root directory". The structure is:                                             
+  hackathon-2-todo-phase-1/                                                                        
+  ├── src/                                                                                         
+  │   └── main.py                                                                                  
+  ├── data/                                                                                        
+  │   └── tasks.json  ← here?                                                                      
+  OR                                                                                               
+  hackathon-2-todo-phase-1/                                                                        
+  ├── src/                                                                                         
+  │   └── main.py                                                                                  
+  ├── tasks.json  ← or here?                                                                       
+                                                                                                   
+  10. 8-Character UUID Display                                                                     
+                                                                                                   
+  You said "8 char uuid at time of creation". To clarify:                                          
+  - Generate full UUID internally (32 chars)                                                       
+  - Display first 8 chars in tables                                                                
+  - Use first 8 chars for selection lists                                                          
+  - But what if two UUIDs have same first 8 chars? (rare but possible)                             
+                                                                                                   
+  11. List Selection Display Format                                                                
+                                                                                                   
+  When showing tasks for selection (update/delete/complete), what format?                          
+  Select a task:                                                                                   
+  1. [✗] Buy groc... (Created: 2025-12-18)                                                         
+  2. [✓] Write sp... (Created: 2025-12-18)                                                         
+  3. [✗] Call mom... (Created: 2025-12-17)                                                         
+  Show status, truncated title, date? Or different format?                                         
+                                                                                                   
+  12. Bulk Operations - Checkbox Display                                                           
+                                                                                                   
+  When using questionary.checkbox for bulk delete/complete:                                        
+  Select tasks to delete (Space to select, Enter to confirm):                                      
+  [ ] 1. [✗] Buy groceries                                                                         
+  [X] 2. [✓] Write specs                                                                           
+  [X] 3. [✗] Call mom                                                                              
+  Then confirm: "Delete 2 selected tasks?" - Correct?                                              
+                                                                                                   
+  13. Integration Tests                                                                            
+                                                                                                   
+  You said "Integration tests for full workflows?" but didn't answer. Should we include:           
+  - Full workflow tests (add → update → complete → delete)?                                        
+  - Or just unit tests for models and storage?                                                     
+                                                                                                   
+  14. Test Coverage Percentage Goal                                                                
+                                                                                                   
+  You mentioned "100% tests should pass" but what about coverage?                                  
+  - Aim for 100% code coverage?                                                                    
+  - 80% coverage acceptable?                                                                       
+  - No specific coverage requirement, just all tests pass?                                         
+                                                                                                   
+  15. Error Message Examples                                                                       
+                                                                                                   
+  You said "show respective error messages". Can you approve these examples?                       
+  - Empty title: "❌ Error: Title cannot be empty (min 1 character required)"                      
+  - Title too long: "❌ Error: Title too long (max 10 characters allowed)"                         
+  - Description too long: "❌ Error: Description too long (max 500 characters allowed)"            
+  - No tasks: "⚠️ No tasks exist yet. Create your first task!"                                     
+  - File corrupted: "❌ Error: Data file corrupted. Resetting to empty. Previous data lost."       
+                                                                                                   
+  16. Success Message - Show Details?                                                              
+                                                                                                   
+  After "✓ Task added successfully!" - should we show the full task details?                       
+  ✓ Task added successfully!                                                                       
+                                                                                                   
+  Task Details:                                                                                    
+  ID: a3f5b8c2                                                                                     
+  Title: Buy groceries                                                                             
+  Description: Milk, eggs, bread                                                                   
+  Status: ✗ Pending                                                                                
+  Created: 2025-12-18 10:30:45                                                                     
+  Or just the success message and move to show all tasks?                                          
+                                                                                                   
+  ---                                                                                              
+  Summary: Answer These Final Questions                                                            
+                                                                                                   
+  1. Title max characters: 10 or 100?                                                              
+  2. After viewing tasks, navigate where?                                                          
+  3. Mark complete menu structure - Option A or B?                                                 
+  4. After update/delete/complete success, navigate where?                                         
+  5. Update field selection - show menu of options?                                                
+  6. Description truncate at how many chars?                                                       
+  7. Pagination UI structure?                                                                      
+  8. Empty list error handling - auto-redirect or show options?                                    
+  9. tasks.json location - in data/ folder or root?                                                
+  10. UUID collision handling (if first 8 chars match)?                                            
+  11. Selection list display format?                                                               
+  12. Checkbox bulk operation UI - correct?                                                        
+  13. Include integration tests or just unit tests?                                                
+  14. Code coverage percentage goal?                                                               
+  15. Error message examples - approved?                                                           
+  16. Show full task details after adding?                                                         
+                                                                                                   
+  Once you answer these, we'll have a complete, implementation-ready specification! 🎯             
+                                                                                                   
+> these are the answers                                                                            
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  1. Title Constraint Issue                                                                        
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said Title max is 10 characters - this seems very restrictive. A task title like "Buy        
+groceries" is 13 characters. Did you mean:                                                         
+  - 10 words?                                                                                      
+                                                                                                   
+  - 100 characters?                                                                                
+                                                                                                   
+  - Or truly 10 characters (very short)?                                                           
+                                                                                                   
+yes 10 words                                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  2. View Menu Sub-Navigation                                                                      
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When user selects "View all tasks", what happens next?                                           
+                                                                                                   
+  View Tasks Menu:                                                                                 
+                                                                                                   
+  1. View all tasks                                                                                
+                                                                                                   
+  2. View pending tasks                                                                            
+                                                                                                   
+  3. View completed tasks                                                                          
+                                                                                                   
+  4. Back to main menu                                                                             
+                                                                                                   
+  After showing the table, does user:                                                              
+                                                                                                   
+  - Automatically return to view menu?                                                             
+                                                                                                   
+  - Automatically return to main menu?                                                             
+                                                                                                   
+  - See options: "Press any key to continue"?  after showing the table the user can go back or     
+select a task to do more operations.                                                               
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  3. Mark Complete/Incomplete Flow                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "if complete, show option for incomplete and vice versa". But from main menu, option    
+ #5 says "Mark task as complete/incomplete".                                                       
+   How does this work?                                                                             
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Option A: One unified menu                                                                       
+                                                                                                   
+  Select task action:                                                                              
+                                                                                                   
+  1. Mark as complete (shows only pending tasks)                                                   
+                                                                                                   
+  2. Mark as incomplete (shows only completed tasks)                                               
+                                                                                                   
+  3. Back                                                                                          
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Option B: Show all tasks with both options available                                             
+                                                                                                   
+  [Shows all tasks]                                                                                
+                                                                                                   
+  Select tasks to toggle status (✓ becomes ✗, ✗ becomes ✓)                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Which approach? Option A                                                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  4. After Success Messages - Navigation                                                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You specified success messages, but what happens after?                                          
+                                                                                                   
+  - Add task → ✓ Success → show all tasks (you mentioned this)                                     
+                                                                                                   
+  - Update task → ✓ Success → return where? (main menu? view menu?) return to the updated task.    
+ then has an option to go back                                                                     
+                                                                                                   
+  - Delete task → ✓ Success → return where?  return to all tasks                                   
+                                                                                                   
+  - Mark complete → ✓ Success → return where?     return to all tasks                              
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  5. Update Flow - Field Selection                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When updating, you said "anyone can be updated" (either title or description). How does user     
+choose?                                                                                            
+  What do you want to update?                                                                      
+                                                                                                   
+  1. Title only                                                                                    
+                                                                                                   
+  2. Description only                                                                              
+                                                                                                   
+  3. Both title and description                                                                    
+                                                                                                   
+  4. Cancel                                                                                        
+                                                                                                   
+  Is this the flow?                                                                                
+                                                                                                   
+yes absolutely.                                                                                    
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  6. Description Truncation Length                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said truncate description in tables. At what length?                                         
+                                                                                                   
+  - 50 characters + "..."?                                                                         
+                                                                                                   
+  - 100 characters + "..."?                                                                        
+                                                                                                   
+  - Fit to terminal width?                                                                         
+                                                                                                   
+                                             fit to terminal width                                 
+                                                                                                   
+  7. Pagination Navigation                                                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When showing 10 tasks per page:                                                                  
+                                                                                                   
+  Showing tasks 1-10 of 47                                                                         
+                                                                                                   
+  [table here]                                                                                     
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  1. Next page                                                                                     
+                                                                                                   
+  2. Previous page                                                                                 
+                                                                                                   
+  3. Back to menu                                                                                  
+                                                                                                   
+  Is this the pagination UI?    yes                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  8. Empty List Handling in Operations                                                             
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When user selects "Update task" but no tasks exist:                                              
+                                                                                                   
+  - Show error: "No tasks exist. Please create a task first."                                      
+                                                                                                   
+  - Then go back to main menu automatically?                                                       
+                                                                                                   
+  - Or show option to create task from there?       go back to main menu                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Same for Delete and Mark Complete operations.                                                    
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  9. JSON File Exact Path                                                                          
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "project root directory". The structure is:                                             
+                                                                                                   
+  hackathon-2-todo-phase-1/                                                                        
+                                                                                                   
+  ├── src/                                                                                         
+                                                                                                   
+  │   └── main.py                                                                                  
+                                                                                                   
+  ├── data/                                                                                        
+                                                                                                   
+  │   └── tasks.json  ← here?                                                                      
+                                                                                                   
+  OR                                                                                               
+                                                                                                   
+  hackathon-2-todo-phase-1/                                                                        
+                                                                                                   
+  ├── src/                                                                                         
+                                                                                                   
+  │   └── main.py                                                                                  
+                                                                                                   
+  ├── tasks.json  ← or here?                                                                       
+                                                                                                   
+                                   second option                                                   
+                                                                                                   
+  10. 8-Character UUID Display                                                                     
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "8 char uuid at time of creation". To clarify:                                          
+                                                                                                   
+  - Generate full UUID internally (32 chars)                                                       
+                                                                                                   
+  - Display first 8 chars in tables                                                                
+                                                                                                   
+  - Use first 8 chars for selection lists                                                          
+                                                                                                   
+  - But what if two UUIDs have same first 8 chars? (rare but possible)  when generating a uuid,    
+ slice it to 8 characters and save.                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  11. List Selection Display Format                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When showing tasks for selection (update/delete/complete), what format?                          
+                                                                                                   
+  Select a task:                                                                                   
+                                                                                                   
+  1. [✗] Buy groc... (Created: 2025-12-18)                                                         
+                                                                                                   
+  2. [✓] Write sp... (Created: 2025-12-18)                                                         
+                                                                                                   
+  3. [✗] Call mom... (Created: 2025-12-17)                                                         
+                                                                                                   
+  Show status, truncated title, date? Or different format?  status and full ttitle and             
+truncated desc below it                                                                            
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  12. Bulk Operations - Checkbox Display                                                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When using questionary.checkbox for bulk delete/complete:                                        
+                                                                                                   
+  Select tasks to delete (Space to select, Enter to confirm):                                      
+                                                                                                   
+  [ ] 1. [✗] Buy groceries                                                                         
+                                                                                                   
+  [X] 2. [✓] Write specs                                                                           
+                                                                                                   
+  [X] 3. [✗] Call mom                                                                              
+                                                                                                   
+  Then confirm: "Delete 2 selected tasks?" - Correct?    yes                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  13. Integration Tests                                                                            
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "Integration tests for full workflows?" but didn't answer. Should we include:           
+                                                                                                   
+  - Full workflow tests (add → update → complete → delete)?                                        
+                                                                                                   
+  - Or just unit tests for models and storage?                                                     
+                                                                                                   
+                                         full workflow tests                                       
+                                                                                                   
+  14. Test Coverage Percentage Goal                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You mentioned "100% tests should pass" but what about coverage?                                  
+                                                                                                   
+  - Aim for 100% code coverage?                                                                    
+                                                                                                   
+  - 80% coverage acceptable?                                                                       
+                                                                                                   
+  - No specific coverage requirement, just all tests pass?  100 pc coverage                        
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  15. Error Message Examples                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "show respective error messages". Can you approve these examples?                       
+                                                                                                   
+  - Empty title: "❌ Error: Title cannot be empty (min 1 character required)"                      
+                                                                                                   
+  - Title too long: "❌ Error: Title too long (max 10 characters allowed)"                         
+                                                                                                   
+  - Description too long: "❌ Error: Description too long (max 500 characters allowed)"            
+                                                                                                   
+  - No tasks: "⚠️ No tasks exist yet. Create your first task!"                                     
+                                                                                                   
+  - File corrupted: "❌ Error: Data file corrupted. Resetting to empty. Previous data lost."       
+                                                                                                   
+                                               yes.                                                
+                                                                                                   
+  16. Success Message - Show Details?                                                              
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  After "✓ Task added successfully!" - should we show the full task details?                       
+                                                                                                   
+  ✓ Task added successfully!                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Task Details:                                                                                    
+                                                                                                   
+  ID: a3f5b8c2                                                                                     
+                                                                                                   
+  Title: Buy groceries                                                                             
+                                                                                                   
+  Description: Milk, eggs, bread                                                                   
+                                                                                                   
+  Status: ✗ Pending                                                                                
+                                                                                                   
+  Created: 2025-12-18 10:30:45                                                                     
+                                                                                                   
+  Or just the success message and move to show all tasks? show the newly created task.             
+  ⎿  API Error: Connection error.                                                                  
+                                                                                                   
+> 1. Title Constraint Issue                                                                        
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said Title max is 10 characters - this seems very restrictive. A task title like "Buy        
+groceries" is 13 characters. Did you mean:                                                         
+  - 10 words?                                                                                      
+                                                                                                   
+  - 100 characters?                                                                                
+                                                                                                   
+  - Or truly 10 characters (very short)?                                                           
+                                                                                                   
+yes 10 words                                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  2. View Menu Sub-Navigation                                                                      
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When user selects "View all tasks", what happens next?                                           
+                                                                                                   
+  View Tasks Menu:                                                                                 
+                                                                                                   
+  1. View all tasks                                                                                
+                                                                                                   
+  2. View pending tasks                                                                            
+                                                                                                   
+  3. View completed tasks                                                                          
+                                                                                                   
+  4. Back to main menu                                                                             
+                                                                                                   
+  After showing the table, does user:                                                              
+                                                                                                   
+  - Automatically return to view menu?                                                             
+                                                                                                   
+  - Automatically return to main menu?                                                             
+                                                                                                   
+  - See options: "Press any key to continue"?  after showing the table the user can go back or     
+select a task to do more operations.                                                               
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  3. Mark Complete/Incomplete Flow                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "if complete, show option for incomplete and vice versa". But from main menu, option    
+ #5 says "Mark task as complete/incomplete".                                                       
+   How does this work?                                                                             
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Option A: One unified menu                                                                       
+                                                                                                   
+  Select task action:                                                                              
+                                                                                                   
+  1. Mark as complete (shows only pending tasks)                                                   
+                                                                                                   
+  2. Mark as incomplete (shows only completed tasks)                                               
+                                                                                                   
+  3. Back                                                                                          
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Option B: Show all tasks with both options available                                             
+                                                                                                   
+  [Shows all tasks]                                                                                
+                                                                                                   
+  Select tasks to toggle status (✓ becomes ✗, ✗ becomes ✓)                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Which approach? Option A                                                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  4. After Success Messages - Navigation                                                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You specified success messages, but what happens after?                                          
+                                                                                                   
+  - Add task → ✓ Success → show all tasks (you mentioned this)                                     
+                                                                                                   
+  - Update task → ✓ Success → return where? (main menu? view menu?) return to the updated task.    
+ then has an option to go back                                                                     
+                                                                                                   
+  - Delete task → ✓ Success → return where?  return to all tasks                                   
+                                                                                                   
+  - Mark complete → ✓ Success → return where?     return to all tasks                              
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  5. Update Flow - Field Selection                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When updating, you said "anyone can be updated" (either title or description). How does user     
+choose?                                                                                            
+  What do you want to update?                                                                      
+                                                                                                   
+  1. Title only                                                                                    
+                                                                                                   
+  2. Description only                                                                              
+                                                                                                   
+  3. Both title and description                                                                    
+                                                                                                   
+  4. Cancel                                                                                        
+                                                                                                   
+  Is this the flow?                                                                                
+                                                                                                   
+yes absolutely.                                                                                    
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  6. Description Truncation Length                                                                 
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said truncate description in tables. At what length?                                         
+                                                                                                   
+  - 50 characters + "..."?                                                                         
+                                                                                                   
+  - 100 characters + "..."?                                                                        
+                                                                                                   
+  - Fit to terminal width?                                                                         
+                                                                                                   
+                                             fit to terminal width                                 
+                                                                                                   
+  7. Pagination Navigation                                                                         
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When showing 10 tasks per page:                                                                  
+                                                                                                   
+  Showing tasks 1-10 of 47                                                                         
+                                                                                                   
+  [table here]                                                                                     
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  1. Next page                                                                                     
+                                                                                                   
+  2. Previous page                                                                                 
+                                                                                                   
+  3. Back to menu                                                                                  
+                                                                                                   
+  Is this the pagination UI?    yes                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  8. Empty List Handling in Operations                                                             
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When user selects "Update task" but no tasks exist:                                              
+                                                                                                   
+  - Show error: "No tasks exist. Please create a task first."                                      
+                                                                                                   
+  - Then go back to main menu automatically?                                                       
+                                                                                                   
+  - Or show option to create task from there?       go back to main menu                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Same for Delete and Mark Complete operations.                                                    
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  9. JSON File Exact Path                                                                          
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "project root directory". The structure is:                                             
+                                                                                                   
+  hackathon-2-todo-phase-1/                                                                        
+                                                                                                   
+  ├── src/                                                                                         
+                                                                                                   
+  │   └── main.py                                                                                  
+                                                                                                   
+  ├── data/                                                                                        
+                                                                                                   
+  │   └── tasks.json  ← here?                                                                      
+                                                                                                   
+  OR                                                                                               
+                                                                                                   
+  hackathon-2-todo-phase-1/                                                                        
+                                                                                                   
+  ├── src/                                                                                         
+                                                                                                   
+  │   └── main.py                                                                                  
+                                                                                                   
+  ├── tasks.json  ← or here?                                                                       
+                                                                                                   
+                                   second option                                                   
+                                                                                                   
+  10. 8-Character UUID Display                                                                     
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "8 char uuid at time of creation". To clarify:                                          
+                                                                                                   
+  - Generate full UUID internally (32 chars)                                                       
+                                                                                                   
+  - Display first 8 chars in tables                                                                
+                                                                                                   
+  - Use first 8 chars for selection lists                                                          
+                                                                                                   
+  - But what if two UUIDs have same first 8 chars? (rare but possible)  when generating a uuid,    
+ slice it to 8 characters and save.                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  11. List Selection Display Format                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When showing tasks for selection (update/delete/complete), what format?                          
+                                                                                                   
+  Select a task:                                                                                   
+                                                                                                   
+  1. [✗] Buy groc... (Created: 2025-12-18)                                                         
+                                                                                                   
+  2. [✓] Write sp... (Created: 2025-12-18)                                                         
+                                                                                                   
+  3. [✗] Call mom... (Created: 2025-12-17)                                                         
+                                                                                                   
+  Show status, truncated title, date? Or different format?  status and full ttitle and             
+truncated desc below it                                                                            
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  12. Bulk Operations - Checkbox Display                                                           
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  When using questionary.checkbox for bulk delete/complete:                                        
+                                                                                                   
+  Select tasks to delete (Space to select, Enter to confirm):                                      
+                                                                                                   
+  [ ] 1. [✗] Buy groceries                                                                         
+                                                                                                   
+  [X] 2. [✓] Write specs                                                                           
+                                                                                                   
+  [X] 3. [✗] Call mom                                                                              
+                                                                                                   
+  Then confirm: "Delete 2 selected tasks?" - Correct?    yes                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  13. Integration Tests                                                                            
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "Integration tests for full workflows?" but didn't answer. Should we include:           
+                                                                                                   
+  - Full workflow tests (add → update → complete → delete)?                                        
+                                                                                                   
+  - Or just unit tests for models and storage?                                                     
+                                                                                                   
+                                         full workflow tests                                       
+                                                                                                   
+  14. Test Coverage Percentage Goal                                                                
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You mentioned "100% tests should pass" but what about coverage?                                  
+                                                                                                   
+  - Aim for 100% code coverage?                                                                    
+                                                                                                   
+  - 80% coverage acceptable?                                                                       
+                                                                                                   
+  - No specific coverage requirement, just all tests pass?  100 pc coverage                        
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  15. Error Message Examples                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  You said "show respective error messages". Can you approve these examples?                       
+                                                                                                   
+  - Empty title: "❌ Error: Title cannot be empty (min 1 character required)"                      
+                                                                                                   
+  - Title too long: "❌ Error: Title too long (max 10 characters allowed)"                         
+                                                                                                   
+  - Description too long: "❌ Error: Description too long (max 500 characters allowed)"            
+                                                                                                   
+  - No tasks: "⚠️ No tasks exist yet. Create your first task!"                                     
+                                                                                                   
+  - File corrupted: "❌ Error: Data file corrupted. Resetting to empty. Previous data lost."       
+                                                                                                   
+                                               yes.                                                
+                                                                                                   
+  16. Success Message - Show Details?                                                              
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  After "✓ Task added successfully!" - should we show the full task details?                       
+                                                                                                   
+  ✓ Task added successfully!                                                                       
+                                                                                                   
+                                                                                                   
+                                                                                                   
+  Task Details:                                                                                    
+                                                                                                   
+  ID: a3f5b8c2                                                                                     
+                                                                                                   
+  Title: Buy groceries                                                                             
+                                                                                                   
+  Description: Milk, eggs, bread                                                                   
+                                                                                                   
+  Status: ✗ Pending                                                                                
+                                                                                                   
+  Created: 2025-12-18 10:30:45                                                                     
+                                                                                                   
+  Or just the success message and move to show all tasks? show the newly created task.             
+                                                                                       
