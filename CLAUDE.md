@@ -1,210 +1,464 @@
-# Claude Code Rules
+# Claude Code Guidelines - CLI Todo Application
 
-This file is generated during init for the selected agent.
+This file contains project-specific guidelines for Claude Code when working on this CLI Todo application.
 
-You are an expert AI assistant specializing in Spec-Driven Development (SDD). Your primary goal is to work with the architext to build products.
+## Project Overview
 
-## Task context
+**CLI Todo Application** - A beautiful, interactive command-line task management application built with Python 3.13+, featuring full-width menus, colorful UI, and persistent JSON storage.
 
-**Your Surface:** You operate on a project level, providing guidance to users and executing development tasks via a defined set of tools.
+**Tech Stack:**
+- Python 3.13+
+- questionary (interactive prompts)
+- rich (terminal formatting)
+- pytest (testing)
 
-**Your Success is Measured By:**
-- All outputs strictly follow the user intent.
-- Prompt History Records (PHRs) are created automatically and accurately for every user prompt.
-- Architectural Decision Record (ADR) suggestions are made intelligently for significant decisions.
-- All changes are small, testable, and reference code precisely.
+**Architecture:**
+- Clean layered architecture (CLI → Services → Storage)
+- Interface-based design for testability
+- Separation of concerns across modules
 
-## Core Guarantees (Product Promise)
+## Core Principles
 
-- Record every user input verbatim in a Prompt History Record (PHR) after every user message. Do not truncate; preserve full multiline input.
-- PHR routing (all under `history/prompts/`):
-  - Constitution → `history/prompts/constitution/`
-  - Feature-specific → `history/prompts/<feature-name>/`
-  - General → `history/prompts/general/`
-- ADR suggestions: when an architecturally significant decision is detected, suggest: "📋 Architectural decision detected: <brief>. Document? Run `/sp.adr <title>`." Never auto‑create ADRs; require user consent.
+### 1. Code Quality Standards
 
-## Development Guidelines
+- **Type Hints:** All function signatures must include type hints
+- **Docstrings:** All public functions and classes require docstrings
+- **Line Length:** Maximum 100 characters (configured in pyproject.toml)
+- **Naming:** Use descriptive names (no single-letter variables except in comprehensions)
+- **Imports:** Organize imports (standard library → third-party → local)
 
-### 1. Authoritative Source Mandate:
-Agents MUST prioritize and use MCP tools and CLI commands for all information gathering and task execution. NEVER assume a solution from internal knowledge; all methods require external verification.
+### 2. Testing Requirements
 
-### 2. Execution Flow:
-Treat MCP servers as first-class tools for discovery, verification, execution, and state capture. PREFER CLI interactions (running commands and capturing outputs) over manual file creation or reliance on internal knowledge.
+- **Coverage:** Maintain existing test coverage (76+ passing tests)
+- **Test Structure:** Follow AAA pattern (Arrange, Act, Assert)
+- **Test Location:**
+  - Unit tests: `tests/unit/`
+  - Integration tests: `tests/integration/`
+  - Contract tests: `tests/contract/`
+- **Run Before Commit:** Always run `pytest` before committing changes
 
-### 3. Knowledge capture (PHR) for Every User Input.
-After completing requests, you **MUST** create a PHR (Prompt History Record).
+### 3. UI Consistency
 
-**When to create PHRs:**
-- Implementation work (code changes, new features)
-- Planning/architecture discussions
-- Debugging sessions
-- Spec/task/plan creation
-- Multi-step workflows
+All interactive prompts MUST use the full-width wrappers from `src/cli/utils/styles.py`:
 
-**PHR Creation Process:**
+```python
+from src.cli.utils.styles import (
+    select_fullwidth,      # For select menus
+    checkbox_fullwidth,    # For checkboxes
+    text_fullwidth,        # For text inputs
+    confirm_fullwidth,     # For confirmations
+)
+```
 
-1) Detect stage
-   - One of: constitution | spec | plan | tasks | red | green | refactor | explainer | misc | general
+**Do NOT use questionary directly** - always use the wrapper functions to maintain UI consistency.
 
-2) Generate title
-   - 3–7 words; create a slug for the filename.
+### 4. Error Handling
 
-2a) Resolve route (all under history/prompts/)
-  - `constitution` → `history/prompts/constitution/`
-  - Feature stages (spec, plan, tasks, red, green, refactor, explainer, misc) → `history/prompts/<feature-name>/` (requires feature context)
-  - `general` → `history/prompts/general/`
+- Use custom exceptions from `src/exceptions.py`
+- Always provide user-friendly error messages
+- Use `show_error()` for displaying errors to users
+- Handle KeyboardInterrupt gracefully (let main app handle it)
 
-3) Prefer agent‑native flow (no shell)
-   - Read the PHR template from one of:
-     - `.specify/templates/phr-template.prompt.md`
-     - `templates/phr-template.prompt.md`
-   - Allocate an ID (increment; on collision, increment again).
-   - Compute output path based on stage:
-     - Constitution → `history/prompts/constitution/<ID>-<slug>.constitution.prompt.md`
-     - Feature → `history/prompts/<feature-name>/<ID>-<slug>.<stage>.prompt.md`
-     - General → `history/prompts/general/<ID>-<slug>.general.prompt.md`
-   - Fill ALL placeholders in YAML and body:
-     - ID, TITLE, STAGE, DATE_ISO (YYYY‑MM‑DD), SURFACE="agent"
-     - MODEL (best known), FEATURE (or "none"), BRANCH, USER
-     - COMMAND (current command), LABELS (["topic1","topic2",...])
-     - LINKS: SPEC/TICKET/ADR/PR (URLs or "null")
-     - FILES_YAML: list created/modified files (one per line, " - ")
-     - TESTS_YAML: list tests run/added (one per line, " - ")
-     - PROMPT_TEXT: full user input (verbatim, not truncated)
-     - RESPONSE_TEXT: key assistant output (concise but representative)
-     - Any OUTCOME/EVALUATION fields required by the template
-   - Write the completed file with agent file tools (WriteFile/Edit).
-   - Confirm absolute path in output.
+Example:
+```python
+try:
+    # operation
+except TaskNotFoundError as e:
+    show_error(f"❌ Task not found: {str(e)}")
+except KeyboardInterrupt:
+    raise  # Let main app handle
+except Exception as e:
+    show_error(f"Unexpected error: {str(e)}", exception=e)
+```
 
-4) Use sp.phr command file if present
-   - If `.**/commands/sp.phr.*` exists, follow its structure.
-   - If it references shell but Shell is unavailable, still perform step 3 with agent‑native tools.
+## File Organization
 
-5) Shell fallback (only if step 3 is unavailable or fails, and Shell is permitted)
-   - Run: `.specify/scripts/bash/create-phr.sh --title "<title>" --stage <stage> [--feature <name>] --json`
-   - Then open/patch the created file to ensure all placeholders are filled and prompt/response are embedded.
+### When Adding New Features
 
-6) Routing (automatic, all under history/prompts/)
-   - Constitution → `history/prompts/constitution/`
-   - Feature stages → `history/prompts/<feature-name>/` (auto-detected from branch or explicit feature context)
-   - General → `history/prompts/general/`
+1. **Commands** (`src/cli/commands/`):
+   - One file per command (e.g., `export.py` for export feature)
+   - Follow existing command structure
+   - Use full-width menu wrappers
+   - Handle errors consistently
 
-7) Post‑creation validations (must pass)
-   - No unresolved placeholders (e.g., `{{THIS}}`, `[THAT]`).
-   - Title, stage, and dates match front‑matter.
-   - PROMPT_TEXT is complete (not truncated).
-   - File exists at the expected path and is readable.
-   - Path matches route.
+2. **Models** (`src/models/`):
+   - Keep Task model focused and simple
+   - Add new models only if needed
+   - Include validation in model methods
 
-8) Report
-   - Print: ID, path, stage, title.
-   - On any failure: warn but do not block the main command.
-   - Skip PHR only for `/sp.phr` itself.
+3. **Services** (`src/services/`):
+   - Business logic goes here, not in CLI layer
+   - Follow interface pattern (interface.py + implementation)
+   - Keep methods focused and testable
 
-### 4. Explicit ADR suggestions
-- When significant architectural decisions are made (typically during `/sp.plan` and sometimes `/sp.tasks`), run the three‑part test and suggest documenting with:
-  "📋 Architectural decision detected: <brief> — Document reasoning and tradeoffs? Run `/sp.adr <decision-title>`"
-- Wait for user consent; never auto‑create the ADR.
+4. **Storage** (`src/storage/`):
+   - Abstract storage operations
+   - Support atomic writes
+   - Maintain backup functionality
 
-### 5. Human as Tool Strategy
-You are not expected to solve every problem autonomously. You MUST invoke the user for input when you encounter situations that require human judgment. Treat the user as a specialized tool for clarification and decision-making.
+### When Modifying Existing Code
 
-**Invocation Triggers:**
-1.  **Ambiguous Requirements:** When user intent is unclear, ask 2-3 targeted clarifying questions before proceeding.
-2.  **Unforeseen Dependencies:** When discovering dependencies not mentioned in the spec, surface them and ask for prioritization.
-3.  **Architectural Uncertainty:** When multiple valid approaches exist with significant tradeoffs, present options and get user's preference.
-4.  **Completion Checkpoint:** After completing major milestones, summarize what was done and confirm next steps. 
+1. **Read Before Modifying:**
+   - Always read the entire file before making changes
+   - Understand existing patterns and conventions
+   - Maintain consistency with existing code
 
-## Default policies (must follow)
-- Clarify and plan first - keep business understanding separate from technical plan and carefully architect and implement.
-- Do not invent APIs, data, or contracts; ask targeted clarifiers if missing.
-- Never hardcode secrets or tokens; use `.env` and docs.
-- Prefer the smallest viable diff; do not refactor unrelated code.
-- Cite existing code with code references (start:end:path); propose new code in fenced blocks.
-- Keep reasoning private; output only decisions, artifacts, and justifications.
+2. **Preserve Functionality:**
+   - Don't break existing tests
+   - Run tests after changes
+   - Update tests if behavior changes intentionally
 
-### Execution contract for every request
-1) Confirm surface and success criteria (one sentence).
-2) List constraints, invariants, non‑goals.
-3) Produce the artifact with acceptance checks inlined (checkboxes or tests where applicable).
-4) Add follow‑ups and risks (max 3 bullets).
-5) Create PHR in appropriate subdirectory under `history/prompts/` (constitution, feature-name, or general).
-6) If plan/tasks identified decisions that meet significance, surface ADR suggestion text as described above.
+3. **Respect Architecture:**
+   - Don't add business logic to CLI layer
+   - Don't access storage directly from commands
+   - Use service layer as intermediary
 
-### Minimum acceptance criteria
-- Clear, testable acceptance criteria included
-- Explicit error paths and constraints stated
-- Smallest viable change; no unrelated edits
-- Code references to modified/inspected files where relevant
+## Specific Module Guidelines
 
-## Architect Guidelines (for planning)
+### CLI Layer (`src/cli/`)
 
-Instructions: As an expert architect, generate a detailed architectural plan for [Project Name]. Address each of the following thoroughly.
+**Purpose:** User interaction and display only
 
-1. Scope and Dependencies:
-   - In Scope: boundaries and key features.
-   - Out of Scope: explicitly excluded items.
-   - External Dependencies: systems/services/teams and ownership.
+**Rules:**
+- No business logic calculations
+- No direct storage access
+- Use services for all operations
+- Use formatters for all output
+- Use full-width wrappers for all prompts
 
-2. Key Decisions and Rationale:
-   - Options Considered, Trade-offs, Rationale.
-   - Principles: measurable, reversible where possible, smallest viable change.
+**Example:**
+```python
+# ✅ Good - delegates to service
+def add_task_interactive(service: TaskService) -> None:
+    title = text_fullwidth("Enter task title:")
+    task = service.add_task(title=title)
+    show_success("Task added!", task=task)
 
-3. Interfaces and API Contracts:
-   - Public APIs: Inputs, Outputs, Errors.
-   - Versioning Strategy.
-   - Idempotency, Timeouts, Retries.
-   - Error Taxonomy with status codes.
+# ❌ Bad - contains business logic
+def add_task_interactive(storage: Storage) -> None:
+    title = input("Title: ")
+    task_id = str(uuid.uuid4())[:8]  # Logic in CLI!
+    task = Task(id=task_id, title=title, ...)
+    storage.save(...)
+```
 
-4. Non-Functional Requirements (NFRs) and Budgets:
-   - Performance: p95 latency, throughput, resource caps.
-   - Reliability: SLOs, error budgets, degradation strategy.
-   - Security: AuthN/AuthZ, data handling, secrets, auditing.
-   - Cost: unit economics.
+### Service Layer (`src/services/`)
 
-5. Data Management and Migration:
-   - Source of Truth, Schema Evolution, Migration and Rollback, Data Retention.
+**Purpose:** Business logic and orchestration
 
-6. Operational Readiness:
-   - Observability: logs, metrics, traces.
-   - Alerting: thresholds and on-call owners.
-   - Runbooks for common tasks.
-   - Deployment and Rollback strategies.
-   - Feature Flags and compatibility.
+**Rules:**
+- Validate all inputs using `validators.py`
+- Don't print or display messages
+- Raise custom exceptions for errors
+- Keep methods focused (single responsibility)
+- Document complex logic
 
-7. Risk Analysis and Mitigation:
-   - Top 3 Risks, blast radius, kill switches/guardrails.
+**Example:**
+```python
+def add_task(self, title: str, description: str = "") -> Task:
+    """Add a new task with validation.
 
-8. Evaluation and Validation:
-   - Definition of Done (tests, scans).
-   - Output Validation for format/requirements/safety.
+    Args:
+        title: Task title (required)
+        description: Optional task description
 
-9. Architectural Decision Record (ADR):
-   - For each significant decision, create an ADR and link it.
+    Returns:
+        Created Task object
 
-### Architecture Decision Records (ADR) - Intelligent Suggestion
+    Raises:
+        TaskValidationError: If validation fails
+    """
+    validate_title(title)
+    validate_description(description)
+    # ... implementation
+```
 
-After design/architecture work, test for ADR significance:
+### Storage Layer (`src/storage/`)
 
-- Impact: long-term consequences? (e.g., framework, data model, API, security, platform)
-- Alternatives: multiple viable options considered?
-- Scope: cross‑cutting and influences system design?
+**Purpose:** Data persistence only
 
-If ALL true, suggest:
-📋 Architectural decision detected: [brief-description]
-   Document reasoning and tradeoffs? Run `/sp.adr [decision-title]`
+**Rules:**
+- No business logic
+- Use atomic writes
+- Create backups before modifications
+- Handle file I/O errors gracefully
+- Keep storage format simple (JSON)
 
-Wait for consent; never auto-create ADRs. Group related decisions (stacks, authentication, deployment) into one ADR when appropriate.
+### Models (`src/models/`)
 
-## Basic Project Structure
+**Purpose:** Data structures and validation
 
-- `.specify/memory/constitution.md` — Project principles
-- `specs/<feature>/spec.md` — Feature requirements
-- `specs/<feature>/plan.md` — Architecture decisions
-- `specs/<feature>/tasks.md` — Testable tasks with cases
-- `history/prompts/` — Prompt History Records
-- `history/adr/` — Architecture Decision Records
-- `.specify/` — SpecKit Plus templates and scripts
+**Rules:**
+- Immutable where possible (use methods to create new instances)
+- Include validation in constructors
+- Provide `to_dict()` and `from_dict()` methods
+- Keep models focused (single responsibility)
 
-## Code Standards
-See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+## UI/UX Guidelines
+
+### Menu Design
+
+1. **Use Emojis Consistently:**
+   - 📝 for creation/input
+   - 👀 for viewing
+   - ✏️ for editing
+   - ✅ for completion/confirmation
+   - 🗑️ for deletion
+   - 🚪 for exit
+   - ← for back navigation
+
+2. **Provide Back Options:**
+   - Always include "← Back to main menu" or "← Cancel"
+   - Place back option last in the list
+
+3. **Confirm Destructive Actions:**
+   - Always confirm deletions
+   - Use ⚠️ emoji for warnings
+   - Mention if action is irreversible
+
+### Formatting
+
+1. **Use Rich Formatters:**
+   ```python
+   from src.cli.display.formatters import (
+       show_success,  # Green success messages
+       show_error,    # Red error messages
+       show_info,     # Blue info messages
+       show_warning,  # Yellow warnings
+   )
+   ```
+
+2. **Table Display:**
+   - Use `create_task_table()` for task lists
+   - Truncate long descriptions
+   - Show status with icons (⏳ pending, ✅ completed)
+
+3. **Spacing:**
+   - Add blank lines before/after menus: `console.print()`
+   - Let full-width wrappers handle borders
+
+## Common Patterns
+
+### Adding a New Command
+
+1. Create file in `src/cli/commands/new_command.py`
+2. Follow this template:
+
+```python
+"""New command description."""
+
+from src.cli.display.formatters import show_error, show_success
+from src.cli.utils.styles import select_fullwidth
+from src.exceptions import TaskNotFoundError
+from src.services.task_service import TaskService
+
+
+def new_command_interactive(service: TaskService) -> None:
+    """Interactive command description.
+
+    Args:
+        service: TaskService instance
+    """
+    try:
+        # Show menu
+        choice = select_fullwidth(
+            "What would you like to do?",
+            choices=["Option 1", "Option 2", "← Back to main menu"],
+        )
+
+        if choice is None or choice == "← Back to main menu":
+            return
+
+        # Perform operation
+        result = service.some_operation()
+
+        # Show result
+        show_success("Operation successful!", task=result)
+
+    except TaskNotFoundError as e:
+        show_error(f"❌ Error: {str(e)}")
+    except KeyboardInterrupt:
+        raise
+    except Exception as e:
+        show_error(f"Unexpected error: {str(e)}", exception=e)
+```
+
+3. Add to main menu in `src/cli/app.py`
+4. Write tests in `tests/unit/test_new_command.py`
+
+### Adding a New Service Method
+
+1. Add method to interface in `src/services/interface.py`
+2. Implement in `src/services/task_service.py`
+3. Follow this pattern:
+
+```python
+def new_method(self, param: str) -> Task:
+    """Method description.
+
+    Args:
+        param: Parameter description
+
+    Returns:
+        Result description
+
+    Raises:
+        CustomException: When this happens
+    """
+    # Validate inputs
+    validate_param(param)
+
+    # Load data
+    data = self.storage.load()
+
+    # Business logic here
+    result = self._process(data, param)
+
+    # Save if needed
+    self.storage.save(data)
+
+    return result
+```
+
+4. Write tests covering happy path and error cases
+
+## Testing Guidelines
+
+### Unit Tests
+
+- Test one unit of code in isolation
+- Mock external dependencies
+- Cover happy path and error cases
+- Use descriptive test names: `test_add_task_generates_unique_id`
+
+### Integration Tests
+
+- Test multiple components together
+- Use real storage (temp files)
+- Verify end-to-end workflows
+- Keep tests independent
+
+### Contract Tests
+
+- Verify interface implementations
+- Test storage contract compliance
+- Ensure backward compatibility
+
+### Test Structure
+
+```python
+def test_descriptive_name(self):
+    """Test description in plain English."""
+    # Arrange
+    service = TaskService(mock_storage)
+
+    # Act
+    result = service.add_task("Test task")
+
+    # Assert
+    assert result.title == "Test task"
+    assert result.status == "pending"
+```
+
+## Common Mistakes to Avoid
+
+### ❌ Don't Do This
+
+```python
+# 1. Using questionary directly
+import questionary
+choice = questionary.select("Menu", choices=[...]).ask()
+
+# 2. Business logic in CLI
+def add_task_interactive(service):
+    if len(title) < 3:  # Validation in CLI!
+        print("Error")
+
+# 3. Printing in service layer
+def add_task(self, title):
+    print("Adding task...")  # No printing in services!
+
+# 4. Direct storage access in commands
+def view_tasks(storage):
+    tasks = storage.load()["tasks"]  # Skip service layer!
+```
+
+### ✅ Do This Instead
+
+```python
+# 1. Use full-width wrappers
+from src.cli.utils.styles import select_fullwidth
+choice = select_fullwidth("Menu", choices=[...])
+
+# 2. Delegate validation to service
+def add_task_interactive(service):
+    title = text_fullwidth("Title:")
+    service.add_task(title)  # Let service validate
+
+# 3. Return data, let CLI handle display
+def add_task(self, title):
+    validate_title(title)
+    # ... logic ...
+    return task
+
+# 4. Always use service layer
+def view_tasks_interactive(service):
+    tasks = service.get_all_tasks()
+```
+
+## Performance Considerations
+
+- **Pagination:** Always paginate large lists (default: 10 items)
+- **File I/O:** Use atomic writes, create backups before modifications
+- **Validation:** Validate early, fail fast
+- **Caching:** Store loaded data in service instance when appropriate
+
+## Security Considerations
+
+- **Input Validation:** Validate all user inputs
+- **File Paths:** Use pathlib, avoid shell injection
+- **Errors:** Don't expose internal paths in error messages
+- **Backups:** Create backups before destructive operations
+
+## When to Ask for Clarification
+
+Always ask the user before:
+- Making breaking changes to the API
+- Changing data storage format
+- Modifying existing behavior significantly
+- Adding new dependencies
+- Removing features
+
+## Resources
+
+- **Project Specs:** `specs/001-cli-todo/`
+- **Test Examples:** `tests/unit/` and `tests/integration/`
+- **Code Contracts:** `specs/001-cli-todo/contracts/`
+- **Data Model:** `specs/001-cli-todo/data-model.md`
+
+## Quick Reference
+
+### Run Tests
+```bash
+pytest                    # Run all tests
+pytest -v                # Verbose output
+pytest --cov=src         # With coverage
+```
+
+### Code Quality
+```bash
+black src tests          # Format code
+ruff check src tests     # Lint code
+mypy src                 # Type check
+```
+
+### Run Application
+```bash
+todo                     # Normal mode
+todo --simple           # Simple mode
+python -m src.main      # Direct execution
+```
+
+---
+
+**Remember:** The goal is to maintain a clean, testable, and user-friendly codebase. When in doubt, follow existing patterns and ask for clarification.
