@@ -1,9 +1,8 @@
 """Update task command implementation."""
 
-import questionary
-
 from src.cli.display.formatters import show_error, show_success
 from src.cli.display.messages import ERROR_VALIDATION, PROMPT_TASK_DESCRIPTION, PROMPT_TASK_TITLE
+from src.cli.utils.styles import select_fullwidth, text_fullwidth
 from src.exceptions import TaskNotFoundError, TaskValidationError
 from src.services.task_service import TaskService
 
@@ -35,23 +34,21 @@ def update_task_interactive(service: TaskService) -> None:
         task_choices.append({"name": "← Back to main menu", "value": None})
 
         # Select task
-        selected_id = questionary.select(
-            "Select a task to update:", choices=task_choices
-        ).ask()
+        selected_id = select_fullwidth("Select a task to update:", choices=task_choices)
 
         if selected_id is None:
             return
 
         # Show update options
-        update_choice = questionary.select(
+        update_choice = select_fullwidth(
             "What would you like to update?",
             choices=[
-                "Title only",
-                "Description only",
-                "Both title and description",
+                "📝 Title only",
+                "📄 Description only",
+                "📝📄 Both title and description",
                 "← Cancel",
             ],
-        ).ask()
+        )
 
         if update_choice is None or update_choice == "← Cancel":
             return
@@ -60,20 +57,20 @@ def update_task_interactive(service: TaskService) -> None:
         new_description = None
 
         # Get new values based on choice
-        if update_choice in ["Title only", "Both title and description"]:
-            new_title = questionary.text(
+        if update_choice in ["📝 Title only", "📝📄 Both title and description"]:
+            new_title = text_fullwidth(
                 PROMPT_TASK_TITLE,
                 validate=lambda text: len(text.strip()) > 0 or "Title cannot be empty",
-            ).ask()
+            )
 
             if new_title is None:
                 return
 
-        if update_choice in ["Description only", "Both title and description"]:
-            new_description = questionary.text(
+        if update_choice in ["📄 Description only", "📝📄 Both title and description"]:
+            new_description = text_fullwidth(
                 PROMPT_TASK_DESCRIPTION,
                 default="",
-            ).ask()
+            )
 
             if new_description is None:
                 return

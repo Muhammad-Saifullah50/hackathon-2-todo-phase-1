@@ -1,13 +1,12 @@
 """Main CLI application with menu routing."""
 
-import questionary
-
 from src.cli.commands.add import add_task_interactive
 from src.cli.commands.toggle import toggle_status_interactive
 from src.cli.commands.update import update_task_interactive
 from src.cli.commands.view import view_all_tasks
 from src.cli.display.formatters import console, show_info, show_welcome_banner
 from src.cli.display.messages import INFO_GOODBYE, PROMPT_MAIN_MENU
+from src.cli.utils.styles import select_fullwidth
 from src.services.task_service import TaskService
 
 
@@ -41,40 +40,43 @@ class TodoApp:
             console.print()
 
             while True:
-                # Show main menu
-                choice = questionary.select(
+                # Show main menu with extra spacing
+                console.print()
+                choice = select_fullwidth(
                     PROMPT_MAIN_MENU,
                     choices=[
-                        "Add task",
-                        "View all tasks",
-                        "Update task",
-                        "Toggle task status",
-                        "Delete tasks",
-                        "Exit",
+                        "📝 Add task",
+                        "👀 View all tasks",
+                        "✏️  Update task",
+                        "✅ Toggle task status",
+                        "🗑️  Delete tasks",
+                        "🚪 Exit",
                     ],
-                ).ask()
+                    use_shortcuts=False,
+                )
 
                 # User cancelled (Ctrl+C or Esc)
                 if choice is None:
                     break
 
                 # Route to command
-                if choice == "Add task":
+                if choice == "📝 Add task":
                     console.print()
                     add_task_interactive(self.service)
-                elif choice == "View all tasks":
+                elif choice == "👀 View all tasks":
                     view_all_tasks(self.service)
-                elif choice == "Update task":
+                elif choice == "✏️  Update task":
                     console.print()
                     update_task_interactive(self.service)
-                elif choice == "Toggle task status":
+                elif choice == "✅ Toggle task status":
                     console.print()
                     toggle_status_interactive(self.service)
-                elif choice == "Delete tasks":
+                elif choice == "🗑️  Delete tasks":
                     console.print()
                     from src.cli.commands.delete import delete_tasks_interactive
+
                     delete_tasks_interactive(self.service)
-                elif choice == "Exit":
+                elif choice == "🚪 Exit":
                     break
 
                 # Add spacing between operations

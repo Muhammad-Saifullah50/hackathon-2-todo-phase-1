@@ -1,8 +1,7 @@
 """Delete tasks command implementation."""
 
-import questionary
-
 from src.cli.display.formatters import console, create_task_table, show_error, show_info
+from src.cli.utils.styles import checkbox_fullwidth, confirm_fullwidth
 from src.exceptions import ValidationError
 from src.services.task_service import TaskService
 
@@ -34,18 +33,16 @@ def delete_tasks_interactive(service: TaskService) -> None:
         ]
 
         # Select tasks to delete
-        selected_ids = questionary.checkbox(
-            "Select tasks to delete:", choices=task_choices
-        ).ask()
+        selected_ids = checkbox_fullwidth("Select tasks to delete:", choices=task_choices)
 
         if selected_ids is None or not selected_ids:
             return
 
         # Confirm deletion
         count = len(selected_ids)
-        confirm = questionary.confirm(
+        confirm = confirm_fullwidth(
             f"⚠️  Delete {count} selected task(s)? This cannot be undone."
-        ).ask()
+        )
 
         if not confirm:
             show_info("Deletion cancelled.")

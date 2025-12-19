@@ -1,7 +1,5 @@
 """Add task command implementation."""
 
-import questionary
-
 from src.cli.display.formatters import show_error, show_success
 from src.cli.display.messages import (
     ERROR_VALIDATION,
@@ -9,6 +7,7 @@ from src.cli.display.messages import (
     PROMPT_TASK_TITLE,
     SUCCESS_TASK_ADDED,
 )
+from src.cli.utils.styles import text_fullwidth
 from src.exceptions import TaskValidationError
 from src.services.task_service import TaskService
 
@@ -23,20 +22,20 @@ def add_task_interactive(service: TaskService) -> None:
     """
     try:
         # Prompt for title
-        title = questionary.text(
+        title = text_fullwidth(
             PROMPT_TASK_TITLE,
             validate=lambda text: len(text.strip()) > 0 or "Title cannot be empty",
-        ).ask()
+        )
 
         # User cancelled
         if title is None:
             return
 
         # Prompt for description (optional)
-        description = questionary.text(
+        description = text_fullwidth(
             PROMPT_TASK_DESCRIPTION,
             default="",
-        ).ask()
+        )
 
         # User cancelled
         if description is None:

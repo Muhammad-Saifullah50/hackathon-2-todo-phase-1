@@ -2,9 +2,8 @@
 
 import math
 
-import questionary
-
 from src.cli.display.formatters import console, create_task_table, show_empty_state, show_info
+from src.cli.utils.styles import select_fullwidth
 from src.services.task_service import TaskService
 
 
@@ -16,23 +15,24 @@ def view_all_tasks(service: TaskService) -> None:
     """
     try:
         # Show filter menu
-        filter_choice = questionary.select(
+        console.print()
+        filter_choice = select_fullwidth(
             "Select view:",
             choices=[
-                "All tasks",
-                "Pending tasks",
-                "Completed tasks",
+                "📋 All tasks",
+                "⏳ Pending tasks",
+                "✅ Completed tasks",
                 "← Back to main menu",
             ],
-        ).ask()
+        )
 
         if filter_choice is None or filter_choice == "← Back to main menu":
             return
 
         # Get tasks based on filter
-        if filter_choice == "All tasks":
+        if filter_choice == "📋 All tasks":
             tasks = service.get_all_tasks()
-        elif filter_choice == "Pending tasks":
+        elif filter_choice == "⏳ Pending tasks":
             tasks = service.filter_by_status("pending")
         else:  # Completed tasks
             tasks = service.filter_by_status("completed")
@@ -75,7 +75,7 @@ def view_all_tasks(service: TaskService) -> None:
                 # Only back option, just return
                 return
 
-            nav = questionary.select("Navigation:", choices=nav_choices).ask()
+            nav = select_fullwidth("Navigation:", choices=nav_choices)
 
             if nav is None or nav == "← Back to filter menu":
                 return

@@ -1,8 +1,7 @@
 """Toggle task status command implementation."""
 
-import questionary
-
 from src.cli.display.formatters import console, create_task_table, show_error, show_info
+from src.cli.utils.styles import checkbox_fullwidth, confirm_fullwidth, select_fullwidth
 from src.exceptions import TaskNotFoundError, ValidationError
 from src.services.task_service import TaskService
 
@@ -15,20 +14,21 @@ def toggle_status_interactive(service: TaskService) -> None:
     """
     try:
         # Show action menu
-        action = questionary.select(
+        console.print()
+        action = select_fullwidth(
             "What would you like to do?",
             choices=[
-                "Mark tasks as complete",
-                "Mark tasks as incomplete",
+                "✅ Mark tasks as complete",
+                "⏸️  Mark tasks as incomplete",
                 "← Back to main menu",
             ],
-        ).ask()
+        )
 
         if action is None or action == "← Back to main menu":
             return
 
         # Filter tasks based on action
-        if action == "Mark tasks as complete":
+        if action == "✅ Mark tasks as complete":
             target_status = "pending"
             tasks = service.filter_by_status("pending")
             success_msg = "✅ {count} task(s) marked as completed!"
@@ -53,25 +53,25 @@ def toggle_status_interactive(service: TaskService) -> None:
         ]
 
         # Select tasks
-        selected_ids = questionary.checkbox(
-            f"Select tasks to mark as {'completed' if action == 'Mark tasks as complete' else 'pending'}:",
+        selected_ids = checkbox_fullwidth(
+            f"Select tasks to mark as {'completed' if action == '✅ Mark tasks as complete' else 'pending'}:",
             choices=task_choices,
-        ).ask()
+        )
 
         if selected_ids is None or not selected_ids:
             return
 
         # Confirm action
         count = len(selected_ids)
-        confirm = questionary.confirm(
-            f"{'Complete' if action == 'Mark tasks as complete' else 'Mark as pending'} {count} selected task(s)?"
-        ).ask()
+        confirm = confirm_fullwidth(
+            f"{'Complete' if action == '✅ Mark tasks as complete' else 'Mark as pending'} {count} selected task(s)?",
+        )
 
         if not confirm:
             return
 
         # Perform bulk update
-        if action == "Mark tasks as complete":
+        if action == "✅ Mark tasks as complete":
             service.mark_tasks_completed(selected_ids)
         else:
             service.mark_tasks_pending(selected_ids)

@@ -1,5 +1,7 @@
 """Rich formatters for beautiful terminal output."""
 
+import shutil
+
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -133,16 +135,37 @@ def show_empty_state() -> None:
 
 def show_welcome_banner() -> None:
     """Display welcome banner when app starts."""
-    banner = """
-[bold cyan]╔═══════════════════════════════════════════════╗
-║                                               ║
-║        📋  TODO CLI APPLICATION  📋           ║
-║                                               ║
-║     Beautiful Task Management in Terminal    ║
-║                                               ║
-╚═══════════════════════════════════════════════╝[/bold cyan]
+    # Get terminal width and create full-width banner
+    term_width = shutil.get_terminal_size().columns
+    # Account for panel borders (2 chars on each side)
+    content_width = term_width - 4
 
-[dim]✨ Features: Add • View • Update • Toggle • Delete ✨[/dim]
-[dim]💡 Tip: Use arrow keys to navigate, Ctrl+C to exit[/dim]
-    """
-    console.print(banner)
+    # Create centered text
+    title = "📋  TODO CLI APPLICATION  📋"
+    subtitle = "Beautiful Task Management in Terminal"
+
+    # Build banner content with proper centering
+    banner_content = (
+        f"\n{title.center(content_width)}\n"
+        f"\n{subtitle.center(content_width)}\n"
+    )
+
+    # Use Rich Panel for full-width display
+    panel = Panel(
+        banner_content,
+        style="bold cyan",
+        border_style="bold cyan",
+        expand=True,  # Make panel expand to full terminal width
+        padding=(1, 2),
+    )
+    console.print(panel)
+
+    # Show features and tips
+    console.print(
+        "[dim]✨ Features: Add • View • Update • Toggle • Delete ✨[/dim]".center(
+            term_width
+        )
+    )
+    console.print(
+        "[dim]💡 Tip: Use arrow keys to navigate, Ctrl+C to exit[/dim]".center(term_width)
+    )
